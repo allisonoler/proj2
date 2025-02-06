@@ -15,25 +15,11 @@ class Predicate {
 
         }
 
-    const string &getName() const {
-        return name;
-    }
 
     void setName(const string &name) {
         Predicate::name = name;
     }
 
-    const vector<Parameter> &getParameters() const {
-        return parameters;
-    }
-
-    void setParameters(const vector<Parameter> &parameters) {
-        Predicate::parameters = parameters;
-    }
-
-    const string &getType() const {
-        return type;
-    }
 
     void addParameter(Parameter parameter) {
             parameters.push_back(parameter);
@@ -44,9 +30,7 @@ class Predicate {
         Predicate::type = type;
     }
 
-    void addparam(string id) {
-            parameters.push_back(id);
-        }
+
 
     string toString() {
             string result = "";

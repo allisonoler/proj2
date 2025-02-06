@@ -9,7 +9,6 @@ class Rule {
 private:
     Predicate headPredicate;
     vector<Predicate> predicates;
-    //headPredicate COLON_DASH predicate predicateList PERIOD
 
 public:
     Rule() : headPredicate(Predicate()), predicates(vector<Predicate>()) {

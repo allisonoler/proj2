@@ -74,10 +74,8 @@ class Parser {
         }
 
         void stringList() {
-            //COMMA STRING stringList | lambda
             if (tokenType() == COMMA) {
                 match(COMMA);
-//                match(STRING);
                 string value = match(STRING).getValue();
                 currentPredicate.addParameter(value);
                 datalogProgram.addDomain(value);
@@ -92,8 +90,6 @@ class Parser {
             if (tokenType() == ID) {
                 currentPredicate.setName(match(ID).getValue());
                 match(LEFT_PAREN);
-//                match(STRING);
-//                currentPredicate.addParameter(match(STRING).getValue());
                 string value = match(STRING).getValue();
                 currentPredicate.addParameter(value);
                 datalogProgram.addDomain(value);
@@ -106,7 +102,6 @@ class Parser {
             currentPredicate.setType("fact");
             datalogProgram.addFact(currentPredicate);
 
-            //ID LEFT_PAREN STRING stringList RIGHT_PAREN PERIOD
         }
 
         void factList() {
@@ -120,13 +115,10 @@ class Parser {
 
         void headPredicate() {
             currentPredicate = Predicate();
-            //ID LEFT_PAREN ID idList RIGHT_PAREN
             if (tokenType() == ID) {
-//                match(ID);
                 currentPredicate.setName(match(ID).getValue());
                 match(LEFT_PAREN);
                 currentPredicate.addParameter(Parameter(match(ID).getValue()));
-//                match(ID);
                 idList();
                 match(RIGHT_PAREN);
             } else {
@@ -136,12 +128,9 @@ class Parser {
         }
 
         void parameter() {
-            //STRING | ID
             if (tokenType() == STRING) {
                 currentPredicate.addParameter(match(STRING).getValue());
-//                match(STRING);
             } else if (tokenType() == ID) {
-//                match(ID);
                 currentPredicate.addParameter(match(ID).getValue());
             } else {
                 throwError();
@@ -156,14 +145,11 @@ class Parser {
             } else {
                 //lambda
             }
-            //COMMA parameter parameterList | lambda
         }
 
         void predicate(){
-            //ID LEFT_PAREN parameter parameterList RIGHT_PAREN
             currentPredicate = Predicate();
             if (tokenType() == ID) {
-//                match(ID);
                 currentPredicate.setName(match(ID).getValue());
                 match(LEFT_PAREN);
                 parameter();
@@ -190,12 +176,10 @@ class Parser {
             } else {
                 //lambda
             }
-            //COMMA predicate predicateList | lambda
         }
 
         void rule(){
             currentRule = Rule();
-            //headPredicate COLON_DASH predicate predicateList PERIOD
             if (tokenType() == ID) {
                 headPredicate();
                 match(COLON_DASH);
@@ -209,8 +193,6 @@ class Parser {
         }
 
         void ruleList() {
-
-            //rule ruleList | lambda
             if (tokenType() == ID) {
                 rule();
                 ruleList();
@@ -226,11 +208,9 @@ class Parser {
             } else {
                 throwError();
             }
-            //predicate Q_MARK
         }
 
         void queryList() {
-            //query queryList | lambda
             if (tokenType()==ID) {
                 query();
                 queryList();
@@ -240,7 +220,6 @@ class Parser {
         }
 
         Token match(TokenType t) {
-//            cout << "match: " << t << endl;
             if (tokenType() == END && t!=END) {
                 throwError();
             }
