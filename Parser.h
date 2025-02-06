@@ -1,17 +1,30 @@
+#pragma once
 #include <vector>
 #include <iostream>
+#include <set>
 #include "Token.h"
+#include "DatalogProgram.h"
+#include "Parameter.h"
+#include "Predicate.h"
+#include "Rule.h"
 using namespace std;
 //
 // Created by allis on 1/28/2025.
 //
 class Parser {
     private:
+    DatalogProgram datalogProgram;
         vector<Token> tokens;
+        Predicate currentPredicate;
+        Rule currentRule;
+        bool ruleTime;
+        bool queryTime;
+
 
     public:
-        Parser(const vector<Token>& tokens) : tokens(tokens) {
-
+        Parser(const vector<Token>& tokens) : tokens(tokens), datalogProgram(DatalogProgram()) {
+            ruleTime = false;
+            queryTime = false;
         }
 
         TokenType tokenType() const {
@@ -30,7 +43,7 @@ class Parser {
         void idList() {
             if (tokenType() == COMMA) {
                 match(COMMA);
-                match(ID);
+                currentPredicate.addParameter(Parameter(match(ID).getValue()));
                 idList();
             } else {
                 // lambda
@@ -38,15 +51,17 @@ class Parser {
         }
 
         void scheme() {
+            currentPredicate = Predicate();
             if (tokenType() == ID) {
-                match(ID);
+                currentPredicate.setName(match(ID).getValue());
                 match(LEFT_PAREN);
-                match(ID);
+                currentPredicate.addParameter(match(ID).getValue());
                 idList();
                 match(RIGHT_PAREN);
             } else {
                 throwError();
             }
+            datalogProgram.addScheme(currentPredicate);
         }
 
         void schemeList() {
@@ -62,7 +77,10 @@ class Parser {
             //COMMA STRING stringList | lambda
             if (tokenType() == COMMA) {
                 match(COMMA);
-                match(STRING);
+//                match(STRING);
+                string value = match(STRING).getValue();
+                currentPredicate.addParameter(value);
+                datalogProgram.addDomain(value);
                 stringList();
             } else {
                 //lambda
@@ -70,16 +88,24 @@ class Parser {
         }
 
         void fact() {
+            currentPredicate = Predicate();
             if (tokenType() == ID) {
-                match(ID);
+                currentPredicate.setName(match(ID).getValue());
                 match(LEFT_PAREN);
-                match(STRING);
+//                match(STRING);
+//                currentPredicate.addParameter(match(STRING).getValue());
+                string value = match(STRING).getValue();
+                currentPredicate.addParameter(value);
+                datalogProgram.addDomain(value);
                 stringList();
                 match(RIGHT_PAREN);
                 match(PERIOD);
             } else {
                 throwError();
             }
+            currentPredicate.setType("fact");
+            datalogProgram.addFact(currentPredicate);
+
             //ID LEFT_PAREN STRING stringList RIGHT_PAREN PERIOD
         }
 
@@ -93,24 +119,30 @@ class Parser {
         }
 
         void headPredicate() {
+            currentPredicate = Predicate();
             //ID LEFT_PAREN ID idList RIGHT_PAREN
             if (tokenType() == ID) {
-                match(ID);
+//                match(ID);
+                currentPredicate.setName(match(ID).getValue());
                 match(LEFT_PAREN);
-                match(ID);
+                currentPredicate.addParameter(Parameter(match(ID).getValue()));
+//                match(ID);
                 idList();
                 match(RIGHT_PAREN);
             } else {
                 throwError();
             }
+            currentRule.setHeadPredicate(currentPredicate);
         }
 
         void parameter() {
             //STRING | ID
             if (tokenType() == STRING) {
-                match(STRING);
+                currentPredicate.addParameter(match(STRING).getValue());
+//                match(STRING);
             } else if (tokenType() == ID) {
-                match(ID);
+//                match(ID);
+                currentPredicate.addParameter(match(ID).getValue());
             } else {
                 throwError();
             }
@@ -129,8 +161,10 @@ class Parser {
 
         void predicate(){
             //ID LEFT_PAREN parameter parameterList RIGHT_PAREN
+            currentPredicate = Predicate();
             if (tokenType() == ID) {
-                match(ID);
+//                match(ID);
+                currentPredicate.setName(match(ID).getValue());
                 match(LEFT_PAREN);
                 parameter();
                 parameterList();
@@ -138,6 +172,14 @@ class Parser {
             } else {
                 throwError();
             }
+            if (ruleTime) {
+                currentRule.addPredicate(currentPredicate);
+            }
+            if (queryTime) {
+                currentPredicate.setType("query");
+                datalogProgram.addQuery(currentPredicate);
+            }
+//            }
         }
 
         void predicateList() {
@@ -152,6 +194,7 @@ class Parser {
         }
 
         void rule(){
+            currentRule = Rule();
             //headPredicate COLON_DASH predicate predicateList PERIOD
             if (tokenType() == ID) {
                 headPredicate();
@@ -162,9 +205,11 @@ class Parser {
             } else {
                 throwError();
             }
+            datalogProgram.addRule(currentRule);
         }
 
         void ruleList() {
+
             //rule ruleList | lambda
             if (tokenType() == ID) {
                 rule();
@@ -194,13 +239,15 @@ class Parser {
             }
         }
 
-        void match(TokenType t) {
-            cout << "match: " << t << endl;
+        Token match(TokenType t) {
+//            cout << "match: " << t << endl;
             if (tokenType() == END && t!=END) {
                 throwError();
             }
             if (tokenType() == t) {
+                Token returnToken = tokens.at(0);
                 advanceToken();
+                return returnToken;
             } else {
                 throwError();
             }
@@ -208,6 +255,8 @@ class Parser {
 
         void parseProgram() {
             try {
+
+
                 //scheme
                 match(SCHEMES);
                 match(COLON);
@@ -219,28 +268,32 @@ class Parser {
                 match(COLON);
                 factList();
 
-
+                ruleTime = true;
                 //rules
                 match(RULES);
                 match(COLON);
                 ruleList();
+                ruleTime = false;
 
                 //QUERIES COLON query queryList
+                queryTime = true;
                 match(QUERIES);
                 match(COLON);
                 query();
                 queryList();
+                queryTime = false;
 
                 match(END);
-                cout<<"Success!";
+                cout<<"Success!\n";
+                cout<<datalogProgram.toString();
 
             }
             catch(Token token){
                 cout<< "Failure!"<<'\n';
                 cout<<"  "<<token.toString();
             }
-            catch (const std::out_of_range& e) {
-                cout<<"no more tokens";
-            }
+//            catch (const std::out_of_range& e) {
+//                cout<<"no more tokens";
+//            }
         }
 };

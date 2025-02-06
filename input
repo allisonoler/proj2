@@ -1,62 +1,58 @@
+
+
+# large test with no errors
+
+
 Schemes:
-   snap(S,N,A,P)
-   csg(C,S,G)
-   cp(C,Q)
-   cdh(C,D,H)
-   cr(C,R)
-   before(C1,C2)
-   tthCourses(C)
-   Schedule(N,C,R,D,H)
-   Grades(N,C,G)
-   Students(C,R,N,G)
-
+   ancestorOf(x,y)
+   childOf(x,y)
+   relativeOf(x,y)
+   descendantOf(x,y)
+   marriedTo(x,y)
+   siblingOf(x,y)
 Facts:
-   snap('12345','C. Brown','12 Apple St.','555-1234').
-   snap('67890','L. Van Pelt','34 Pear Ave.','555-5678').
-   snap('22222','P. Patty','56 Grape Blvd.','555-9999').
-   snap('33333','Snoopy','12 Apple St.','555-1234').
-   csg('CS101','12345','A').
-   csg('CS101','67890','B').
-   csg('EE200','12345','C').
-   csg('EE200','22222','B+').
-   csg('EE200','33333','B').
-   csg('CS101','33333','A-').
-   csg('PH100','67890','C+').
-   cp('CS101','CS100').
-   cp('EE200','EE005').
-   cp('EE200','CS100').
-   cp('CS120','CS101').
-   cp('CS121','CS120').
-   cp('CS205','CS101').
-   cp('CS206','CS121').
-   cp('CS206','CS205').
-   cdh('CS101','Tu','10AM').
-   cdh('EE200','M','10AM').
-   cdh('EE200','W','1PM').
-   cdh('EE200','F','10AM').
-   cdh('PH100','Th','11AM').
-   cr('CS101','Turing Aud.').
-   cr('EE200','25 Ohm Hall').
-   cr('PH100','Newton Lab.').
-
+   marriedTo('Zed','Bea').
+   marriedTo('Jack','Jill').
+   marriedTo('Ned','Jan').
+   marriedTo('Tim','Jane').
+   marriedTo('Fred','Anne').
+   marriedTo('Dan','Kim').
+   childOf('Jill','Zed').
+   childOf('Ned','Bea').
+   childOf('Tim','Jack').
+   childOf('Sue','Jack').
+   childOf('Anne','Jill').
+   childOf('Stan','Jan').
+   childOf('Dan','Jan').
+   childOf('Lou','Jane').
+   childOf('Mary','Tim').
+   childOf('Bill','Fred').
+   childOf('Tom','Fred').
+   childOf('Ron','Dan').
+   childOf('Anna','Kim').
 Rules:
-   before(C1,C2) :- cp(C2,C1).
-   before(C1,C2) :- cp(C3,C1),before(C3,C2).
-   tthCourses(C) :- cdh(C,'Tu',H).
-   tthCourses(C) :- cdh(C,'Th',H).
-   Schedule(N,C,R,D,H) :- snap(S,N,A,P),csg(C,S,G),cr(C,R),cdh(C,D,H).
-   Grades(N,C,G) :- snap(S,N,A,P),csg(C,S,G).
-   Students(C,R,N,G) :- snap(S,N,A,P),csg(C,S,G),cr(C,R).
-
+   marriedTo(X,Y):-marriedTo(Y,X).
+   childOf(X,Y):-childOf(X,Z),marriedTo(Y,Z).
+   siblingOf(X,Y):-childOf(X,Z),childOf(Y,Z).
+   descendantOf(X,Y):-childOf(X,Y).
+   descendantOf(X,Y):-childOf(X,Z),descendantOf(Z,Y).
+   ancestorOf(X,Y):-descendantOf(Y,X).
+   relativeOf(X,Y):-descendantOf(X,Z),descendantOf(Y,Z).
 Queries:
-   snap(Id,'Snoopy',A,P)?
-   csg(Course,'33333',Grade)?
-   cp(Course,'CS100')?
-   cdh('EE200',Day,Hour)?
-   cr('CS101',Room)?
-   tthCourses(C)?
-   before('CS100','CS206')?
-   before('CS100',prerequisiteTo)?
-   Schedule('Snoopy',C,R,D,H)?
-   Grades('Snoopy',C,G)?
-   Students('CS101',R,N,G)?
+   marriedTo('Bea','Zed')?
+   childOf('Jill','Bea')?
+   siblingOf('Ron','Anna')?
+   siblingOf('Tim','Sue')?
+   siblingOf('Tim',X)?
+   descendantOf('Lou','Zed')?
+   descendantOf('Zed','Lou')?
+   descendantOf('Lou',X)?
+   ancestorOf('Tom','Bea')?
+   ancestorOf('Bea','Tom')?
+   ancestorOf('Bea',X)?
+   relativeOf('Mary','Lou')?
+   relativeOf('Mary','Bill')?
+   relativeOf('Mary','Anna')?
+   relativeOf('Mary','Kim')? 
+
+

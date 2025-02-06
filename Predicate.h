@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 #include <sstream>
 #include "Parameter.h"
@@ -10,22 +11,60 @@ class Predicate {
         string type;
 
     public:
-        Predicate(string name, vector<Parameter> parameters, string type) : name(name), parameters(parameters), type(type) {
+        Predicate() : name(""), parameters(vector<Parameter>()), type("") {
 
         }
 
-        string toString() {
-            string result = "";
-            result += name += "(" + parameters.at(0).toString();
-            for (int i = 1; i<parameters.size(); i++) {
-                result += "," + parameters.at(i).toString();
+    const string &getName() const {
+        return name;
+    }
 
+    void setName(const string &name) {
+        Predicate::name = name;
+    }
+
+    const vector<Parameter> &getParameters() const {
+        return parameters;
+    }
+
+    void setParameters(const vector<Parameter> &parameters) {
+        Predicate::parameters = parameters;
+    }
+
+    const string &getType() const {
+        return type;
+    }
+
+    void addParameter(Parameter parameter) {
+            parameters.push_back(parameter);
+
+        }
+
+    void setType(const string &type) {
+        Predicate::type = type;
+    }
+
+    void addparam(string id) {
+            parameters.push_back(id);
+        }
+
+    string toString() {
+            string result = "";
+            if (!parameters.empty()) {
+                result += name += "(" + parameters.at(0).toString();
+                for (int i = 1; i < parameters.size(); i++) {
+                    result += "," + parameters.at(i).toString();
+
+                }
+                result += ")";
             }
-            result += ")";
+
             if (type =="fact") {
                 return result +=".";
             } else if (type == "query") {
                 return result +="?";
+            } else if (type=="colon_style") {
+                return result+=":";
             } else {
                 return result;
             }

@@ -17,6 +17,10 @@ class Token {
 
 		}
 
+        string getValue() {
+            return value;
+        }
+
         TokenType getType() const {
             return type;
         }

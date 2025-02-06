@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 #include <sstream>
 #include "Parameter.h"
@@ -11,17 +12,27 @@ private:
     //headPredicate COLON_DASH predicate predicateList PERIOD
 
 public:
-    Rule(Predicate headPredicate, vector<Predicate> predicates) : headPredicate(headPredicate), predicates(predicates) {
+    Rule() : headPredicate(Predicate()), predicates(vector<Predicate>()) {
 
+    }
+
+    void setHeadPredicate(Predicate predicate) {
+        headPredicate = predicate;
+    }
+
+    void addPredicate(Predicate predicate) {
+        predicates.push_back(predicate);
     }
 
     string toString() {
         string result = "";
         result += headPredicate.toString() + " :- ";
-        result += predicates.at(0).toString();
-        for (int i = 1; i<predicates.size(); i++) {
-            result += "," + predicates.at(i).toString();
+        if (!predicates.empty()) {
+            result += predicates.at(0).toString();
+            for (int i = 1; i < predicates.size(); i++) {
+                result += "," + predicates.at(i).toString();
 
+            }
         }
         result += ".";
         return result;
